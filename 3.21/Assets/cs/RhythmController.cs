@@ -4,12 +4,34 @@ using UnityEngine;
 
 public class RhythmController : MonoBehaviour
 {
-    //public JudgeResult Judge(float inputTime, NoteData note)
-    //{
-    //    float delta = Mathf.Abs(inputTime - note.time);
 
-    //    if (delta < 0.03f) return Perfect;
-    //    if (delta < 0.08f) return Good;
-    //    return Miss;
-    //}
+    public AudioSource rhythm;
+    public static RhythmController instance;
+
+    public float CurrentTime => rhythm.time;
+
+    private void Awake()
+    {
+        if (instance == null) instance = this;
+        else Destroy(instance);
+
+        rhythm = GetComponent<AudioSource>();
+        rhythm.Play();
+    }
+
+    //¼ì²â½á¹û
+    public void Judge(float inputTime, NoteData note)
+    {
+        float delta = Mathf.Abs(inputTime - note.time);
+
+        if (delta < 0.05f)
+        {
+            GameManager.instance.AddComboAndCheck(true);
+            note.isHit = true;
+        }
+        else
+            GameManager.instance.AddComboAndCheck(false);
+    }
+
+    
 }

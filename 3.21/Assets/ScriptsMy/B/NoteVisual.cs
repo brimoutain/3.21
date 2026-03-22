@@ -1,11 +1,11 @@
-﻿using System;
+﻿using DG.Tweening;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
-using DG.Tweening;
 
 namespace Node
 {
-    public class NodeViusal: MonoBehaviour
+    public class NoteVisual: MonoBehaviour
     {
         //image
         public Sprite imageA;
@@ -53,14 +53,36 @@ namespace Node
             {
                 if (Input.GetKeyDown(KeyCode.A))
                 {
-                    //判定，左
+                    JudgeLane(false);//欧
                     //根据返回结果设置gm
                 }
                 else if (Input.GetKeyDown(KeyCode.KeypadEnter))
                 {
-                    //判定，右
+                    JudgeLane(true);//欧
                 }
             }
+        }
+
+        //欧：对象池对应的初始化和回收
+        public void Init(NoteData data)
+        {
+            judgeTime = data.time;
+            switchImage = data.lane;
+            image.sprite = switchImage ? imageA : imageB;
+            gameObject.SetActive(true);
+        }
+        public void Recycle()
+        {
+            gameObject.SetActive(false);
+        }
+        void JudgeLane(bool lane)
+        {
+            //找最近的对应方向音符
+            float currentTime = RhythmController.instance.CurrentTime;
+            NoteData best =NoteSpawner.instance. FindClosestNote(lane, currentTime);
+
+            //明公传inputTime
+            //RhythmController.instance.Judge(inputTime, best);
         }
     }
 }
