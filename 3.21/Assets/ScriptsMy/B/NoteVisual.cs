@@ -80,9 +80,9 @@ namespace Node
             //找最近的对应方向音符
             float currentTime = RhythmController.instance.CurrentTime;
             NoteData best =NoteSpawner.instance. FindClosestNote(lane, currentTime);
-
+            
             //明公传inputTime
-            //RhythmController.instance.Judge(inputTime, best);
+            RhythmController.instance.Judge(GameManager.instance.currentTime, best);
         }
     }
 }

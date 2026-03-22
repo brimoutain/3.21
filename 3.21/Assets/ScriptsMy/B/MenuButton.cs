@@ -13,6 +13,6 @@ public class MenuButton : MonoBehaviour
     public void EnterGame()
     {
         LoadSceneMode mode = LoadSceneMode.Single;
-        SceneManager.LoadScene("Game");
+        SceneManager.LoadScene("00");
     }
 }

@@ -27,6 +27,7 @@ public class GameManager : MonoBehaviour
     public uint currentStateNodeNum = 0;
     private uint currentStateNodeNeed;
     public uint combo = 0;
+    public float currentTime = 0;
     
     // Start is called before the first frame update
     private void Awake()
@@ -34,6 +35,11 @@ public class GameManager : MonoBehaviour
         instance = this;
         currentState = GameState.State0;
         //获取初始node数量
+    }
+
+    private void Update()
+    {
+        currentTime += Time.deltaTime;
     }
 
 
