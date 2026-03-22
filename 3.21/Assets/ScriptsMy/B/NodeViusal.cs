@@ -7,10 +7,14 @@ namespace Node
 {
     public class NodeViusal: MonoBehaviour
     {
+        //image
         public Sprite imageA;
         public Sprite imageB;
         private Image image;
         public bool switchImage = false;
+        
+        //time
+        public float judgeTime = 0;
         public float duration = 2f;
 
         private void Awake()
