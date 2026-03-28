@@ -40,6 +40,7 @@ public class GameManager : MonoBehaviour
     private void Update()
     {
         currentTime += Time.deltaTime;
+
     }
 
 

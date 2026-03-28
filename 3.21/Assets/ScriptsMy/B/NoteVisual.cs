@@ -7,6 +7,9 @@ namespace Node
 {
     public class NoteVisual: MonoBehaviour
     {
+        //animation
+        private Animator animator;
+
         //image
         public Sprite imageA;
         public Sprite imageB;
@@ -23,6 +26,12 @@ namespace Node
             //image = gameObject.AddComponent<Image>();
             image = GetComponent<Image>();
             image.sprite = switchImage ? imageA : imageB;
+
+            animator= GameObject.Find("player").GetComponent<Animator>();
+            if (animator == null)
+            {
+                Debug.Log("Animator Error");
+            }
         }
         
         public void ParabolicWithDOTween()
@@ -53,12 +62,18 @@ namespace Node
             {
                 if (Input.GetKeyDown(KeyCode.A))
                 {
-                    JudgeLane(false);//欧
+                    animator.SetInteger("Drum", 0);
+                    JudgeLane(0);//欧
                     //根据返回结果设置gm
                 }
                 else if (Input.GetKeyDown(KeyCode.KeypadEnter))
                 {
-                    JudgeLane(true);//欧
+                    animator.SetInteger("Drum", 1);
+                    JudgeLane(1);//欧
+                }
+                else
+                {
+                    animator.SetInteger("Drum", 3);
                 }
             }
         }
@@ -67,15 +82,15 @@ namespace Node
         public void Init(NoteData data)
         {
             judgeTime = data.time;
-            switchImage = data.lane;
-            image.sprite = switchImage ? imageA : imageB;
+            //switchImage = data.lane;
+            //image.sprite = switchImage ? imageA : imageB;
             gameObject.SetActive(true);
         }
         public void Recycle()
         {
             gameObject.SetActive(false);
         }
-        void JudgeLane(bool lane)
+        void JudgeLane(int lane)
         {
             //找最近的对应方向音符
             float currentTime = RhythmController.instance.CurrentTime;
