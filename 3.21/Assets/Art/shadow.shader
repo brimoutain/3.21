@@ -26,6 +26,8 @@ Shader "Custom/shadow"
         // 在HLSLINCLUDE中声明所有Pass共享的变量
         TEXTURE2D(_MainTex);
         SAMPLER(sampler_MainTex);
+        TEXTURE2D(_BaseMap);
+        SAMPLER(sampler_BaseMap);
         
         CBUFFER_START(UnityPerMaterial)
             float4 _MainTex_ST;
@@ -77,7 +79,7 @@ Shader "Custom/shadow"
             
             half4 frag(v2f i) : SV_Target
             {
-                half4 col = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.uv) * _Color;
+                half4 col = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.uv) ;
                 
                 // Alpha测试
                 clip(col.a - _Cutoff);
@@ -89,7 +91,9 @@ Shader "Custom/shadow"
                 // 应用阴影
                 float shadowFactor = mainLight.shadowAttenuation;
                 col.rgb = lerp(col.rgb * _ShadowColor.rgb, col.rgb, shadowFactor); 
-
+                half4 noisecol=SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, i.uv);
+                col*=noisecol;
+       
 
                 float3 normalWS=normalize(i.normalWS);
                 float NdotL=saturate(dot(normalWS,mainLight.direction));
@@ -97,7 +101,7 @@ Shader "Custom/shadow"
                 half3 ambient=col.rgb*SampleSH(normalWS);
                 
                
-               half3 finalColor=diffuse+ambient;
+               half3 finalColor=diffuse+ambient+ _Color*(1-noisecol);
                return half4(finalColor,col.a);
            }
             ENDHLSL
@@ -164,6 +168,7 @@ Shader "Custom/shadow"
             half4 ShadowFrag(Varyings input) : SV_TARGET
             {
                 half4 col = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv);
+                
                 clip(col.a - _Cutoff);  // Alpha测试
                 return 0;
             }

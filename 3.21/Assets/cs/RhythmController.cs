@@ -14,8 +14,11 @@ public class RhythmController : MonoBehaviour
     {
         if (instance == null) instance = this;
         else Destroy(instance);
-
-        rhythm = GetComponent<AudioSource>();
+        Invoke("PlayRhythm", 0f);
+    }
+    private void PlayRhythm()
+    {
+        Debug.Log("22222");
         rhythm.Play();
     }
 
@@ -24,7 +27,7 @@ public class RhythmController : MonoBehaviour
     {
         float delta = Mathf.Abs(inputTime - note.time);
 
-        Debug.Log(delta);
+        //Debug.Log(delta);
         if (delta < 0.05f)
         {
             GameManager.instance.AddComboAndCheck(true);

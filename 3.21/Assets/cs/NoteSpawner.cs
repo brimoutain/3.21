@@ -75,7 +75,7 @@ public class NoteSpawner : MonoBehaviour
         }
         string[] lines = csvFile.text.Split('\n');
 
-        // 跳过第一二行
+        // 跳过第一行
         for (int i = 1; i < lines.Length; i++)
         {
             if (string.IsNullOrWhiteSpace(lines[i])) continue;
