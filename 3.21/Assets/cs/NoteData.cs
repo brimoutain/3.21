@@ -4,7 +4,7 @@ using UnityEngine;
 
 public enum NoteType
 {
-    Left,
+    Left = 0,
     Right,
     Both
 }

@@ -88,9 +88,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2577152c436344e1b7572fffcf189c80, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  imageA: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
-  imageB: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
-  imageC: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
+  imageA: {fileID: 21300000, guid: 41941d5ba677d224b9e9a261f8117b39, type: 3}
+  imageB: {fileID: 21300000, guid: fa2788d021bd3604caf94a41402b22bb, type: 3}
+  imageC: {fileID: 21300000, guid: 764314e5a8b3ecb4098374b51a363ec4, type: 3}
   switchImage: 0
   judgeTime: 0
   duration: 2

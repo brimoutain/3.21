@@ -94,8 +94,7 @@ namespace Node
         public void Init(NoteData data)
         {
             judgeTime = data.time;
-            //switchImage = data.lane;
-            //image.sprite = switchImage ? imageA : imageB;
+            switchImage = (int)data.lane;
             gameObject.SetActive(true);
             image = GetComponentInChildren<Image>();
             switch (switchImage)
