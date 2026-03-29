@@ -281,16 +281,16 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 584709776}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: -0.20791169, w: 0.9781476}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1472870228}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -24}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -200, y: 100}
+  m_AnchoredPosition: {x: -240, y: 115}
   m_SizeDelta: {x: 27.1123, y: 130.4357}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &584709778
@@ -646,7 +646,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1127303782}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 172515602e62fb746b5d573b38a5fe58, type: 3}
   m_Name: 
@@ -682,7 +682,6 @@ GameObject:
   - component: {fileID: 1136036088}
   - component: {fileID: 1136036087}
   - component: {fileID: 1136036091}
-  - component: {fileID: 1136036090}
   - component: {fileID: 1136036089}
   m_Layer: 0
   m_Name: GameManager
@@ -736,24 +735,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2577152c436344e1b7572fffcf189c80, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  imageA: {fileID: 0}
-  imageB: {fileID: 0}
+  imageA: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
+  imageB: {fileID: 10911, guid: 0000000000000000f000000000000000, type: 0}
+  imageC: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
   switchImage: 0
   judgeTime: 0
   duration: 2
---- !u!114 &1136036090
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1136036086}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d38d60ddaafcb054ebd8e491af6a67e2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  prefab: {fileID: 1136036089}
 --- !u!114 &1136036091
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -768,7 +755,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   spawnAheadTime: 2
   data: []
-  pool: {fileID: 1136036090}
+  pool: {fileID: 1472870230}
   csvFile: {fileID: 4900000, guid: 82e6d79711de0224da6c126838a08bee, type: 3}
 --- !u!1 &1226665700
 GameObject:
@@ -1026,6 +1013,7 @@ GameObject:
   - component: {fileID: 1472870226}
   - component: {fileID: 1472870225}
   - component: {fileID: 1472870229}
+  - component: {fileID: 1472870230}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -1130,6 +1118,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   combo: {fileID: 348971770}
+--- !u!114 &1472870230
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1472870224}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d38d60ddaafcb054ebd8e491af6a67e2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  prefab: {fileID: 7677576562933406543, guid: 605cfd0f621b5d2418a289ae9cda0aca, type: 3}
 --- !u!1 &1816417798
 GameObject:
   m_ObjectHideFlags: 0

@@ -19,11 +19,12 @@ public class RhythmController : MonoBehaviour
         rhythm.Play();
     }
 
-    //¼ì²â½á¹û
+    //ï¿½ï¿½ï¿½ï¿½ï¿½
     public void Judge(float inputTime, NoteData note)
     {
         float delta = Mathf.Abs(inputTime - note.time);
 
+        Debug.Log(delta);
         if (delta < 0.05f)
         {
             GameManager.instance.AddComboAndCheck(true);

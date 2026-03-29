@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Node;
 using Unity.VisualScripting;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
@@ -24,7 +25,7 @@ public class NoteSpawner : MonoBehaviour
 
     void Update()
     {
-        float t =RhythmController.instance.CurrentTime;//当前曲子的播放时间
+        float t = GameManager.instance.currentTime;
 
         // 持续生成note
         while (currentIndex < data.Count &&
@@ -37,7 +38,7 @@ public class NoteSpawner : MonoBehaviour
     void Spawn(NoteData note)
     {
         var obj = pool.Get(); // 对象池
-        obj.Init(note);       // 传入 time / lane
+        obj.GetComponent<NoteVisual>().Init(note);       // 传入 time / lane
     }
 
     //找最近音符

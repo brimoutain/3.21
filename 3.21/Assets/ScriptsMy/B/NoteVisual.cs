@@ -13,8 +13,9 @@ namespace Node
         //image
         public Sprite imageA;
         public Sprite imageB;
+        public Sprite imageC;
         private Image image;
-        public bool switchImage = false;
+        public int switchImage = 0;
         
         //time
         public float judgeTime = 0;
@@ -22,22 +23,46 @@ namespace Node
 
         private void Awake()
         {
-            ParabolicWithDOTween();
-            //image = gameObject.AddComponent<Image>();
-            image = GetComponent<Image>();
-            image.sprite = switchImage ? imageA : imageB;
-
             animator= GameObject.Find("player").GetComponent<Animator>();
             if (animator == null)
             {
                 Debug.Log("Animator Error");
             }
         }
-        
+
+        private void Update()
+        {
+            float currentTime = GameManager.instance.currentTime;
+
+            float diff = currentTime - judgeTime;
+
+            // ===== 是否进入判定窗口 =====
+            if (Mathf.Abs(diff) <= 0.5f)   // 判定窗口 ±0.2s
+            {
+                // 只在窗口内响应输入
+                if (Input.GetKeyDown(KeyCode.A))
+                {
+                    animator.SetInteger("Drum", 0);
+                    JudgeLane(0);
+                }
+                else if (Input.GetKeyDown(KeyCode.KeypadEnter))
+                {
+                    animator.SetInteger("Drum", 1);
+                    JudgeLane(1);
+                }
+            }
+
+            // ===== 超出窗口 → Miss =====
+            if (diff > 0.5f)
+            {
+                Miss();
+            }
+        }
+
         public void ParabolicWithDOTween()
         {
             Vector3 startPos = new Vector3(-300, -100, 0);
-            Vector3 endPos = startPos + new Vector3(600, 0, 0);
+            Vector3 endPos = startPos + new Vector3(540, 20, 0);
             float jumpHeight = 60f;
             
             float elapsed = 0;
@@ -55,27 +80,14 @@ namespace Node
                 image.rectTransform.anchoredPosition = new Vector3(x, y, 0);
             }, 1f, duration).SetEase(Ease.Linear);
         }
-
-        private void OnCollisionStay2D(Collision2D other)
+        
+        
+        void Miss()
         {
-            if (other.gameObject.CompareTag("Judge"))
-            {
-                if (Input.GetKeyDown(KeyCode.A))
-                {
-                    animator.SetInteger("Drum", 0);
-                    JudgeLane(0);//欧
-                    //根据返回结果设置gm
-                }
-                else if (Input.GetKeyDown(KeyCode.KeypadEnter))
-                {
-                    animator.SetInteger("Drum", 1);
-                    JudgeLane(1);//欧
-                }
-                else
-                {
-                    animator.SetInteger("Drum", 3);
-                }
-            }
+            image.DOKill();
+
+            image.DOFade(0, 0.1f)
+                .OnComplete(() => Recycle());
         }
 
         //欧：对象池对应的初始化和回收
@@ -85,19 +97,34 @@ namespace Node
             //switchImage = data.lane;
             //image.sprite = switchImage ? imageA : imageB;
             gameObject.SetActive(true);
+            image = GetComponentInChildren<Image>();
+            switch (switchImage)
+            {
+                case 0:
+                    image.sprite = imageA;
+                    break;
+                case 1:
+                    image.sprite = imageB;
+                    break;
+                case 2:
+                    image.sprite = imageC;
+                    break;
+            }
+            ParabolicWithDOTween();
         }
         public void Recycle()
         {
             gameObject.SetActive(false);
         }
+        
         void JudgeLane(int lane)
         {
             //找最近的对应方向音符
-            float currentTime = RhythmController.instance.CurrentTime;
-            NoteData best =NoteSpawner.instance. FindClosestNote(lane, currentTime);
+            float currentTime = GameManager.instance.currentTime;
+            NoteData best =NoteSpawner.instance.FindClosestNote(lane, currentTime);
             
             //明公传inputTime
-            RhythmController.instance.Judge(GameManager.instance.currentTime, best);
+            RhythmController.instance.Judge(currentTime, best);
         }
     }
 }

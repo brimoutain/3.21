@@ -4,11 +4,11 @@ using UnityEngine;
 
 public class NotePool : MonoBehaviour
 {
-    public NoteVisual prefab;
+    public GameObject prefab;
 
-    private Queue<NoteVisual> pool = new Queue<NoteVisual>();
+    private Queue<GameObject> pool = new Queue<GameObject>();
 
-    public NoteVisual Get()
+    public GameObject Get()
     {
         if (pool.Count > 0)
         {
@@ -20,9 +20,9 @@ public class NotePool : MonoBehaviour
         }
     }
 
-    public void Return(NoteVisual note)
+    public void Return(GameObject note)
     {
-        note.Recycle();
+        note.GetComponent<NoteVisual>().Recycle();
         pool.Enqueue(note);
     }
 }
