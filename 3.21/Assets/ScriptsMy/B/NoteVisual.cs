@@ -35,9 +35,8 @@ namespace Node
             float currentTime = GameManager.instance.currentTime;
 
             float diff = currentTime - judgeTime;
-
-            // ===== 是否进入判定窗口 =====
-            if (Mathf.Abs(diff) <= 0.5f)   // 判定窗口 ±0.2s
+            
+            if (Mathf.Abs(diff) <= 0.5f)   // 判定窗口 
             {
                 // 只在窗口内响应输入
                 if (Input.GetKeyDown(KeyCode.A))
@@ -51,8 +50,7 @@ namespace Node
                     JudgeLane(1);
                 }
             }
-
-            // ===== 超出窗口 → Miss =====
+            
             if (diff > 0.5f)
             {
                 Miss();
