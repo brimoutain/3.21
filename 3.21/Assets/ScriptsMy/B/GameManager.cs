@@ -123,7 +123,7 @@ public class GameManager : MonoBehaviour
             Debug.Log("prevI="+ prevIndex);
             GameObject add = added[prevIndex];
             add.GetComponent<SpriteRenderer>().enabled= true;
-            add.GetComponent<AudioSource>().volume = 1;
+            add.GetComponent<AudioSource>().volume = 0.8f;
             //add.SetActive(true);
 
             Transform t = add.transform;

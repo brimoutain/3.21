@@ -79,7 +79,7 @@ Shader "Custom/shadow"
             
             half4 frag(v2f i) : SV_Target
             {
-                half4 col = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.uv) ;
+                half4 col = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, TRANSFORM_TEX(i.uv,_MainTex)) ;
                 
                 // Alpha≤‚ ‘
                 clip(col.a - _Cutoff);
@@ -91,7 +91,8 @@ Shader "Custom/shadow"
                 // ”¶”√“ı”∞
                 float shadowFactor = mainLight.shadowAttenuation;
                 col.rgb = lerp(col.rgb * _ShadowColor.rgb, col.rgb, shadowFactor); 
-                half4 noisecol=SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, i.uv);
+
+                half4 noisecol=SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, TRANSFORM_TEX(i.uv,_BaseMap));
                 col*=noisecol;
        
 

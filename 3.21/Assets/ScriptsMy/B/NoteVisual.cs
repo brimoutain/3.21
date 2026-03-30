@@ -7,11 +7,8 @@ namespace Node
 {
     public class NoteVisual : MonoBehaviour
     {
-
         // image
-        public Sprite imageA;
-        public Sprite imageB;
-        public Sprite imageC;
+        
         private Image image;
         public int switchImage = 0;
 
@@ -47,6 +44,11 @@ namespace Node
 
             // 判定窗口前沿未到，不响应输入
             if (diff < -JUDGE_WINDOW) return;
+            if (m_firstKeyDown && (Time.unscaledTime - m_firstKeyTime) > DOUBLE_KEY_THRESHOLD)
+            {
+                m_firstKeyDown = false;
+                m_firstKeyTime = float.MinValue;
+            }
 
             switch (switchImage)
             {
@@ -69,7 +71,13 @@ namespace Node
             bool pressedA = Input.GetKeyDown(KeyCode.A);
             bool pressedL = Input.GetKeyDown(KeyCode.L);
 
-            if (!pressedA && !pressedL) return; // ← 无输入直接返回，不执行超时重置
+            // 两键同帧同时按下，直接触发
+            if (pressedA && pressedL)
+            {
+                Trigger();
+                return;
+            }
+            if (!pressedA && !pressedL) return;
 
             float now = Time.unscaledTime;
 
@@ -81,18 +89,8 @@ namespace Node
             }
             else
             {
-                float gap = now - m_firstKeyTime;
-                if (gap <= DOUBLE_KEY_THRESHOLD)
-                {
-                    // 两键间隔够近，视为双键
-                    Trigger();
-                }
-                else
-                {
-                    // 间隔太长，以当前键重新开始
-                    m_firstKeyDown = true;
-                    m_firstKeyTime = now;
-                }
+                // 第二个键按下，间隔已在 Update 里保证 <= DOUBLE_KEY_THRESHOLD
+                Trigger();
             }
         }
         private void Trigger()
@@ -104,12 +102,18 @@ namespace Node
             {
                 case 0:
                     RhythmController.instance.Right();
+                    image.DOKill();
+                    image.DOFade(0, 0.1f).OnComplete(() => Recycle());
                     break;
                 case 1:
                     RhythmController.instance.Left();
+                    image.DOKill();
+                    image.DOFade(0, 0.1f).OnComplete(() => Recycle());
                     break;
                 case 2:
                     RhythmController.instance.Double();
+                    image.DOKill();
+                    image.DOFade(0, 0.1f).OnComplete(() => Recycle());
                     break;
             }
 
@@ -120,6 +124,8 @@ namespace Node
         {
             if (m_judged) return;
             m_judged = true;
+
+            GameManager.instance.AddComboAndCheck(false);
 
             image.DOKill();
             image.DOFade(0, 0.1f).OnComplete(() => Recycle());
@@ -146,9 +152,9 @@ namespace Node
 
             switch (switchImage)
             {
-                case 0: image.sprite = imageA; break;
-                case 1: image.sprite = imageB; break;
-                case 2: image.sprite = imageC; break;
+                case 0: image.sprite =RhythmController.instance.imageA; break;
+                case 1: image.sprite = RhythmController.instance.imageB; break;
+                case 2: image.sprite = RhythmController.instance.imageC; break;
             }
 
             ParabolicWithDOTween();
@@ -156,9 +162,9 @@ namespace Node
 
         public void ParabolicWithDOTween()
         {
-            Vector3 startPos = new Vector3(-200, -150, 0);
+            Vector3 startPos = new Vector3(-200, -160, 0);
             Vector3 endPos = startPos + new Vector3(400, 20, 0);
-            float jumpHeight = 50f;
+            float jumpHeight = 40f;
 
             DOTween.To(() => 0f, t =>
             {
