@@ -1,5 +1,5 @@
 ﻿using DG.Tweening;
-using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,155 +7,172 @@ namespace Node
 {
     public class NoteVisual : MonoBehaviour
     {
-        //animation
-        private Animator animator;
 
-        //image
+        // image
         public Sprite imageA;
         public Sprite imageB;
         public Sprite imageC;
         private Image image;
         public int switchImage = 0;
 
-        //time
+        // time
         public float judgeTime = 0;
         public float duration = 2f;
 
-        float lastAPressTime = 10000f;
-        float lastEnterPressTime = -1f;
-        float doubleKeyThreshold = 0.05f;
+        // 判定窗口
+        private const float JUDGE_WINDOW = 0.5f;
+        // 双键两次按下的最大间隔（视为同时）
+        private const float DOUBLE_KEY_THRESHOLD = 0.08f;
 
-        static bool hasJudgedThisFrame = false;//全局锁
+        // 双键模式下，记录第一个键按下的时刻（unscaledTime）
+        private float m_firstKeyTime = float.MinValue;
+        private bool m_firstKeyDown = false;
 
-        private void Awake()
-        {
-            animator = GameObject.Find("player").GetComponent<Animator>();
-            if (animator == null)
-            {
-                Debug.Log("Animator Error");
-            }
-        }
+        // 防止重复判定
+        private bool m_judged = false;
 
         private void Update()
         {
-            if (hasJudgedThisFrame) return;
+            if (m_judged) return;
 
             float currentTime = GameManager.instance.currentTime;
-
             float diff = currentTime - judgeTime;
 
-            if (Mathf.Abs(diff) <= 0.5f)   // 判定窗口 
-            {
-                // 记录按键时间
-                if (Input.GetKeyDown(KeyCode.A))
-                    lastAPressTime = Time.time;
-
-                if (Input.GetKeyDown(KeyCode.L))
-                    lastEnterPressTime = Time.time;
-
-                if (Mathf.Abs(lastAPressTime - lastEnterPressTime) <= doubleKeyThreshold)
-                {
-                    hasJudgedThisFrame = true;
-                    animator.SetTrigger("DrumDouble");
-                    JudgeLane(2);
-
-                    lastAPressTime = -1f;
-                    lastEnterPressTime = -1f;
-                    return;
-                }
-
-                // 单键
-                if (Input.GetKeyDown(KeyCode.A))
-                {
-                    hasJudgedThisFrame = true;
-                    animator.SetTrigger("DrumLeft");
-                    JudgeLane(0);
-                }
-                else if (Input.GetKeyDown(KeyCode.L))
-                {
-                    hasJudgedThisFrame = true;
-                    animator.SetTrigger("DrumRight");
-                    JudgeLane(1);
-                }
-
-            }
-
-            if (diff > 0.5f)
+            // Miss：Note 已超出判定窗口后沿
+            if (diff > JUDGE_WINDOW)
             {
                 Miss();
+                return;
+            }
+
+            // 判定窗口前沿未到，不响应输入
+            if (diff < -JUDGE_WINDOW) return;
+
+            switch (switchImage)
+            {
+                case 0: HandleSingle(KeyCode.A); break;
+                case 1: HandleSingle(KeyCode.L); break;
+                case 2: HandleDouble(); break;
             }
         }
 
-        void LateUpdate()
+        // 单键 Note：只响应指定键
+        private void HandleSingle(KeyCode key)
         {
-            hasJudgedThisFrame = false;
+            if (Input.GetKeyDown(key))
+                Trigger();
         }
 
-        public void ParabolicWithDOTween()
+        // 双键 Note：需要 A + L 在窗口内都按下
+        private void HandleDouble()
         {
-            Vector3 startPos = new Vector3(-400, -200, 0);
-            Vector3 endPos = startPos + new Vector3(540, 20, 0);
-            float jumpHeight = 60f;
+            bool pressedA = Input.GetKeyDown(KeyCode.A);
+            bool pressedL = Input.GetKeyDown(KeyCode.L);
 
-            float elapsed = 0;
+            if (!pressedA && !pressedL) return; // ← 无输入直接返回，不执行超时重置
 
-            DOTween.To(() => 0f, t => {
-                elapsed = t;
+            float now = Time.unscaledTime;
 
-                // 计算 X 位置（线性移动）
-                float x = Mathf.Lerp(startPos.x, endPos.x, t);
+            if (!m_firstKeyDown)
+            {
+                // 第一个键
+                m_firstKeyDown = true;
+                m_firstKeyTime = now;
+            }
+            else
+            {
+                float gap = now - m_firstKeyTime;
+                if (gap <= DOUBLE_KEY_THRESHOLD)
+                {
+                    // 两键间隔够近，视为双键
+                    Trigger();
+                }
+                else
+                {
+                    // 间隔太长，以当前键重新开始
+                    m_firstKeyDown = true;
+                    m_firstKeyTime = now;
+                }
+            }
+        }
+        private void Trigger()
+        {
+            if (m_judged) return;
+            m_judged = true;
 
-                // 计算 Y 位置（抛物线公式）
-                // y = 起始Y + 高度 * sin(π * t)
-                float y = startPos.y + jumpHeight * Mathf.Sin(Mathf.PI * t);
+            switch (switchImage)
+            {
+                case 0:
+                    RhythmController.instance.Right();
+                    break;
+                case 1:
+                    RhythmController.instance.Left();
+                    break;
+                case 2:
+                    RhythmController.instance.Double();
+                    break;
+            }
 
-                image.rectTransform.anchoredPosition = new Vector3(x, y, 0);
-            }, 1f, duration).SetEase(Ease.Linear);
+            JudgeLane(switchImage);
         }
 
-
-        void Miss()
+        private void Miss()
         {
+            if (m_judged) return;
+            m_judged = true;
+
             image.DOKill();
-
-            image.DOFade(0, 0.1f)
-                .OnComplete(() => Recycle());
+            image.DOFade(0, 0.1f).OnComplete(() => Recycle());
         }
 
-        //欧：对象池对应的初始化和回收
+        // 找到对应 lane 最近的 Note 并交给 RhythmController 判定
+        private void JudgeLane(int lane)
+        {
+            float currentTime = GameManager.instance.currentTime;
+            NoteData best = NoteSpawner.instance.FindClosestNote(lane, currentTime);
+            RhythmController.instance.Judge(currentTime, best);
+        }
+
         public void Init(NoteData data)
         {
             judgeTime = data.time;
             switchImage = (int)data.lane;
+            m_judged = false;
+            m_firstKeyDown = false;
+            m_firstKeyTime = float.MinValue;
+
             gameObject.SetActive(true);
             image = GetComponentInChildren<Image>();
+
             switch (switchImage)
             {
-                case 0:
-                    image.sprite = imageA;
-                    break;
-                case 1:
-                    image.sprite = imageB;
-                    break;
-                case 2:
-                    image.sprite = imageC;
-                    break;
+                case 0: image.sprite = imageA; break;
+                case 1: image.sprite = imageB; break;
+                case 2: image.sprite = imageC; break;
             }
+
             ParabolicWithDOTween();
         }
+
+        public void ParabolicWithDOTween()
+        {
+            Vector3 startPos = new Vector3(-200, -150, 0);
+            Vector3 endPos = startPos + new Vector3(400, 20, 0);
+            float jumpHeight = 50f;
+
+            DOTween.To(() => 0f, t =>
+            {
+                float x = Mathf.Lerp(startPos.x, endPos.x, t);
+                float y = startPos.y + jumpHeight * Mathf.Sin(Mathf.PI * t);
+                image.rectTransform.anchoredPosition = new Vector3(x, y, 0);
+                image.rectTransform.localScale = Vector2.one*0.5f;
+            }, 1f, duration).SetEase(Ease.Linear);
+        }
+
         public void Recycle()
         {
             gameObject.SetActive(false);
         }
-
-        void JudgeLane(int lane)
-        {
-            //找最近的对应方向音符
-            float currentTime = GameManager.instance.currentTime;
-            NoteData best = NoteSpawner.instance.FindClosestNote(lane, currentTime);
-
-            //明公传inputTime
-            RhythmController.instance.Judge(currentTime, best);
-        }
+        
     }
 }
