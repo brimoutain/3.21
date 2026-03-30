@@ -21,9 +21,11 @@ namespace Node
         public float judgeTime = 0;
         public float duration = 2f;
 
-        float lastAPressTime = -1f;
+        float lastAPressTime = 10000f;
         float lastEnterPressTime = -1f;
         float doubleKeyThreshold = 0.05f;
+
+        static bool hasJudgedThisFrame = false;//全局锁
 
         private void Awake()
         {
@@ -36,18 +38,8 @@ namespace Node
 
         private void Update()
         {
+            if (hasJudgedThisFrame) return;
 
-            // 单键
-            if (Input.GetKeyDown(KeyCode.A))
-            {
-                animator.SetTrigger("DrumLeft");
-                JudgeLane(0);
-            }
-            else if (Input.GetKeyDown(KeyCode.L))
-            {
-                animator.SetTrigger("DrumRight");
-                JudgeLane(1);
-            }
             float currentTime = GameManager.instance.currentTime;
 
             float diff = currentTime - judgeTime;
@@ -55,20 +47,35 @@ namespace Node
             if (Mathf.Abs(diff) <= 0.5f)   // 判定窗口 
             {
                 // 记录按键时间
-                //if (Input.GetKeyDown(KeyCode.A))
-                //    lastAPressTime = Time.time;
+                if (Input.GetKeyDown(KeyCode.A))
+                    lastAPressTime = Time.time;
 
-                //if (Input.GetKeyDown(KeyCode.L))
-                //    lastEnterPressTime = Time.time;
+                if (Input.GetKeyDown(KeyCode.L))
+                    lastEnterPressTime = Time.time;
 
                 if (Mathf.Abs(lastAPressTime - lastEnterPressTime) <= doubleKeyThreshold)
                 {
+                    hasJudgedThisFrame = true;
                     animator.SetTrigger("DrumDouble");
                     JudgeLane(2);
 
                     lastAPressTime = -1f;
                     lastEnterPressTime = -1f;
                     return;
+                }
+
+                // 单键
+                if (Input.GetKeyDown(KeyCode.A))
+                {
+                    hasJudgedThisFrame = true;
+                    animator.SetTrigger("DrumLeft");
+                    JudgeLane(0);
+                }
+                else if (Input.GetKeyDown(KeyCode.L))
+                {
+                    hasJudgedThisFrame = true;
+                    animator.SetTrigger("DrumRight");
+                    JudgeLane(1);
                 }
 
             }
@@ -79,9 +86,14 @@ namespace Node
             }
         }
 
+        void LateUpdate()
+        {
+            hasJudgedThisFrame = false;
+        }
+
         public void ParabolicWithDOTween()
         {
-            Vector3 startPos = new Vector3(-300, -100, 0);
+            Vector3 startPos = new Vector3(-400, -200, 0);
             Vector3 endPos = startPos + new Vector3(540, 20, 0);
             float jumpHeight = 60f;
 

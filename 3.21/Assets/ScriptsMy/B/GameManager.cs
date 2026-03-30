@@ -23,7 +23,7 @@ public class GameManager : MonoBehaviour
     public List<GameObject> stateShow = new List<GameObject>();
     public List<Vector3> scales = new List<Vector3>();
     public List<GameObject> added = new List<GameObject>();
-    public List<AudioSource>  audioSources = new List<AudioSource>();
+    //public List<AudioSource>  audioSources = new List<AudioSource>();
     
 
     // 摄像机
@@ -32,7 +32,8 @@ public class GameManager : MonoBehaviour
 
     // 游戏得分
     public uint currentStateNodeNum = 0;
-    private uint currentStateNodeNeed;
+    //private uint currentStateNodeNeed;
+    public List<uint> stateNeedList;//每个阶段不同的need需求
     public uint combo = 0;
     public float currentTime = 0;
 
@@ -51,7 +52,8 @@ public class GameManager : MonoBehaviour
         // 初始化 added 全部隐藏
         foreach (var a in added)
         {
-            a.SetActive(false);
+            a.GetComponent<SpriteRenderer>().enabled =false;
+            a.GetComponent<AudioSource>().volume = 0;
             scales.Add(a.transform.localScale);
             a.transform.localScale = Vector3.zero;
         }
@@ -65,16 +67,27 @@ public class GameManager : MonoBehaviour
     // 增加 combo 并检测阶段变化
     public void AddComboAndCheck(bool continuous = true)
     {
-        if (continuous) combo++;
+        if (continuous) 
+        { 
+            combo++;
+
+            currentStateNodeNum++;
+            if (currentState == GameState.End) return; // 防止继续增长
+
+            if (CanChangeState())
+            {
+                currentState++;
+                if ((int)currentState >= stateShow.Count)
+                {
+                    currentState = GameState.End;
+                    return;
+                }
+
+                ChangeState();
+            }
+        }
         else combo = 0;
 
-        currentStateNodeNum++;
-
-        if (CanChangeState())
-        {
-            currentState++;
-            ChangeState();
-        }
     }
 
     // 阶段切换入口
@@ -94,7 +107,7 @@ public class GameManager : MonoBehaviour
             prev.transform.DOScale(Vector3.zero, 0.1f)
                 .OnComplete(() => prev.SetActive(false));
         }
-        
+
         if (curIndex < stateShow.Count)
         {
             GameObject cur = stateShow[curIndex];
@@ -107,8 +120,11 @@ public class GameManager : MonoBehaviour
         
         if (prevIndex >= 0 && prevIndex < added.Count)
         {
+            Debug.Log("prevI="+ prevIndex);
             GameObject add = added[prevIndex];
-            add.SetActive(true);
+            add.GetComponent<SpriteRenderer>().enabled= true;
+            add.GetComponent<AudioSource>().volume = 1;
+            //add.SetActive(true);
 
             Transform t = add.transform;
             t.localScale = Vector3.zero;
@@ -116,13 +132,16 @@ public class GameManager : MonoBehaviour
             t.DOScale(scales[prevIndex], 0.15f)
                 .SetEase(Ease.OutBack);
 
-            audioSources[curIndex].volume = 1;
+            //audioSources[curIndex].volume = 1;
         }
     }
 
  
     private bool CanChangeState()
     {
-        return currentStateNodeNum >= currentStateNodeNeed;
+        int index = (int)currentState;
+        if (index >= stateNeedList.Count) return false;
+
+        return currentStateNodeNum >= stateNeedList[index];
     }
 }

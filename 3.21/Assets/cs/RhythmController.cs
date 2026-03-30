@@ -18,15 +18,14 @@ public class RhythmController : MonoBehaviour
     }
     private void PlayRhythm()
     {
-        Debug.Log("22222");
         rhythm.Play();
     }
 
-    //�����
     public void Judge(float inputTime, NoteData note)
     {
         float delta = Mathf.Abs(inputTime - note.time);
 
+        Debug.Log("Judge调用一下");
         //Debug.Log(delta);
         if (delta < 0.05f)
         {
